@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Order = require('../models/Order');
 const Parcel = require('../models/Parcel');
+const PickupRequest = require('../models/PickupRequest');
 const { generateCSV } = require('../utils/generateCSV');
 const sendEmail = require('../config/email')
 
