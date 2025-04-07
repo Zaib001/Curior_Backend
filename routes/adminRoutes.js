@@ -2,6 +2,7 @@ const express = require('express');
 const {
   getAllUsers,
   deleteUser,
+  markParcelAsReturned, deleteParcelById, updateParcelById, getParcelById,
   getAllParcels,
   getAllOrders,
   getRevenueReport,
@@ -24,7 +25,7 @@ const {
 
 const authMiddleware = require('../middleware/auth');
 const { getRealTimeLocation } = require('../controllers/merchantController');
-const {sendNotification } = require('../controllers/parcelController');
+const { sendNotification } = require('../controllers/parcelController');
 
 const router = express.Router();
 
@@ -54,6 +55,11 @@ router.get('/reports/status-csv', authMiddleware(['admin']), exportParcelStatusC
 router.get('/reports/average-delivery-time', authMiddleware(['admin']), getAverageDeliveryTime);
 router.get('/reports/order-value-insights', authMiddleware(['admin']), getOrderValueInsights);
 router.delete('/users/:id', authMiddleware(['admin']), deleteUser);
+// Parcel management routes (to be implemented in controller)
+router.get('/parcels/:id', authMiddleware(['admin']), getParcelById); // optional
+router.put('/parcels/:id', authMiddleware(['admin']), updateParcelById);
+router.delete('/parcels/:id', authMiddleware(['admin']), deleteParcelById);
+router.patch('/parcels/:id/return', authMiddleware(['admin']), markParcelAsReturned);
 
 // ✅ Real-Time Tracking API
 router.get('/real-time-location/:parcelId', authMiddleware(['driver', 'admin']), getRealTimeLocation);

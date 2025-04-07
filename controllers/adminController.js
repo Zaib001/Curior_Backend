@@ -397,3 +397,53 @@ exports.getAllPickupRequests = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+exports.markParcelAsReturned = async (req, res) => {
+  try {
+    const parcel = await Parcel.findById(req.params.id);
+    if (!parcel) return res.status(404).json({ message: 'Parcel not found' });
+    parcel.currentStatus = 'Returned';
+    await parcel.save();
+    res.json({ message: 'Parcel marked as returned', data: parcel });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating status', error });
+  }
+};
+exports.markParcelAsReturned = async (req, res) => {
+  try {
+    const parcel = await Parcel.findById(req.params.id);
+    if (!parcel) return res.status(404).json({ message: 'Parcel not found' });
+    parcel.currentStatus = 'Returned';
+    await parcel.save();
+    res.json({ message: 'Parcel marked as returned', data: parcel });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating status', error });
+  }
+};
+exports.updateParcelById = async (req, res) => {
+  try {
+    const updated = await Parcel.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updated) return res.status(404).json({ message: 'Parcel not found' });
+    res.json({ message: 'Parcel updated successfully', data: updated });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating parcel', error });
+  }
+};
+exports.getParcelById = async (req, res) => {
+  try {
+    const parcel = await Parcel.findById(req.params.id);
+    if (!parcel) return res.status(404).json({ message: 'Parcel not found' });
+    res.json(parcel);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching parcel', error });
+  }
+};
+exports.deleteParcelById = async (req, res) => {
+  try {
+    const deleted = await Parcel.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: 'Parcel not found' });
+    res.json({ message: 'Parcel deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting parcel', error });
+  }
+};
