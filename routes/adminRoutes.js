@@ -17,6 +17,7 @@ const {
   getAverageDeliveryTime,
   getOrderValueInsights,
   getAllDrivers,
+  getAllPickupRequests,
   assignDriverToParcels
 
 } = require('../controllers/adminController');
@@ -36,6 +37,7 @@ router.get('/parcels', authMiddleware(['admin']), getAllParcels);
 router.get('/orders', authMiddleware(['admin']), getAllOrders);
 
 router.get('/drivers', authMiddleware(['admin']), getAllDrivers);
+router.get('/pickups', authMiddleware(['admin']), getAllPickupRequests);
 // Assign Driver to Parcel
 router.put('/assign-driver', authMiddleware(['admin']), assignDriverToParcels);
 // ✅ Reports APIs
