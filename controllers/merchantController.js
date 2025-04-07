@@ -208,13 +208,13 @@ exports.createParcelsBulk = async (req, res) => {
       return res.status(400).json({ message: 'No parcels provided.' });
     }
 
-    // Attach sender to each parcel
-    const parcelsWithSender = parcels.map((p) => ({
+    const enrichedParcels = parcels.map((p) => ({
       ...p,
       sender: senderId,
+      isWithinM25: checkIfWithinM25(p.postcode),
     }));
 
-    const created = await Parcel.insertMany(parcelsWithSender);
+    const created = await Parcel.insertMany(enrichedParcels);
     res.status(201).json(created);
   } catch (error) {
     console.warn('Bulk creation error:', error);
