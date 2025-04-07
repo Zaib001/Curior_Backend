@@ -75,7 +75,7 @@ exports.getAllParcels = async (req, res) => {
 };
 exports.getAllDrivers = async (req, res) => {
   try {
-    const drivers = await User.find({ role: 'driver' }).select('-password');
+    const drivers = await User.find({ role: 'driver' }).select('_id name email');
     res.json(drivers);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -83,22 +83,17 @@ exports.getAllDrivers = async (req, res) => {
 };
 
 // ✅ Assign Driver to Parcel
-exports.assignDriverToParcel = async (req, res) => {
+exports.assignDriverToParcels = async (req, res) => {
+  const { parcelIds, driverId } = req.body;
+  if (!parcelIds?.length || !driverId)
+    return res.status(400).json({ message: 'Parcel IDs and Driver ID are required' });
+
   try {
-    const { parcelId } = req.params;
-    const { driverId } = req.body;
-
-    const parcel = await Parcel.findByIdAndUpdate(
-      parcelId,
-      { driverId, currentStatus: 'Picked Up' },
-      { new: true }
+    const result = await Parcel.updateMany(
+      { _id: { $in: parcelIds } },
+      { driverId }
     );
-
-    if (!parcel) {
-      return res.status(404).json({ message: 'Parcel not found.' });
-    }
-
-    res.json({ message: 'Driver assigned successfully', parcel });
+    res.json({ message: 'Driver assigned successfully', result });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

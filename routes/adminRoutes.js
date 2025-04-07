@@ -17,14 +17,13 @@ const {
   getAverageDeliveryTime,
   getOrderValueInsights,
   getAllDrivers,
-  assignDriverToParcel,
-  getAllPickupRequests
+  assignDriverToParcels
 
 } = require('../controllers/adminController');
 
 const authMiddleware = require('../middleware/auth');
 const { getRealTimeLocation } = require('../controllers/merchantController');
-const { assignDriver, sendNotification } = require('../controllers/parcelController');
+const {sendNotification } = require('../controllers/parcelController');
 
 const router = express.Router();
 
@@ -35,10 +34,10 @@ router.delete('/users/:userId', authMiddleware(['admin']), deleteUser);
 // ✅ Parcel Management APIs
 router.get('/parcels', authMiddleware(['admin']), getAllParcels);
 router.get('/orders', authMiddleware(['admin']), getAllOrders);
-router.get('/pickups', authMiddleware(['admin']),getAllPickupRequests);
+
 router.get('/drivers', authMiddleware(['admin']), getAllDrivers);
 // Assign Driver to Parcel
-router.put('/parcels/:parcelId/assign-driver', authMiddleware(['admin']), assignDriverToParcel);
+router.put('/assign-driver', authMiddleware(['admin']), assignDriverToParcels);
 // ✅ Reports APIs
 router.get('/reports/revenue', authMiddleware(['admin']), getRevenueReport);
 router.get('/reports/status', authMiddleware(['admin']), getOrderStatusReport);
@@ -56,9 +55,6 @@ router.delete('/users/:id', authMiddleware(['admin']), deleteUser);
 
 // ✅ Real-Time Tracking API
 router.get('/real-time-location/:parcelId', authMiddleware(['driver', 'admin']), getRealTimeLocation);
-
-// ✅ Parcel Assignment API
-router.put('/:id/assign', authMiddleware(['admin']), assignDriver);
 
 // ✅ Notification API
 router.post('/send-notification', authMiddleware(['admin', 'merchant']), sendNotification);
