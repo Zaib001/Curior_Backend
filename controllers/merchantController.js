@@ -202,58 +202,26 @@ exports.getAnalytics = async (req, res) => {
 exports.createParcelsBulk = async (req, res) => {
   try {
     const { parcels } = req.body;
-    const merchantId = req.user._id;
+    const senderId = req.user.userId;
 
     if (!Array.isArray(parcels) || parcels.length === 0) {
       return res.status(400).json({ message: 'No parcels provided.' });
     }
 
-    const errors = [];
-    const validParcels = [];
+    // Attach sender to each parcel
+    const parcelsWithSender = parcels.map((p) => ({
+      ...p,
+      sender: senderId,
+    }));
 
-    for (let i = 0; i < parcels.length; i++) {
-      const row = parcels[i];
-      const rowNumber = i + 2; 
-
-      if (!row.receiver || !row.trackingId || !row.address || !row.postcode) {
-        errors.push(`Row ${rowNumber}: Missing required fields.`);
-        continue;
-      }
-
-      const existing = await Parcel.findOne({ trackingId: row.trackingId });
-      if (existing) {
-        errors.push(`Row ${rowNumber}: Duplicate tracking ID (${row.trackingId}).`);
-        continue;
-      }
-
-      validParcels.push({
-        sender: merchantId,
-        receiver: row.receiver,
-        trackingId: row.trackingId.toUpperCase(),
-        address: row.address,
-        postcode: row.postcode,
-        currentStatus: row.currentStatus || 'Created',
-        phone: row.phone || '',
-        deliveryType: row.deliveryType || 'Standard',
-        isWithinM25: checkIfWithinM25(row.postcode),
-      });
-    }
-
-    if (validParcels.length === 0) {
-      return res.status(400).json({ message: 'No valid parcels to upload.', errors });
-    }
-
-    const inserted = await Parcel.insertMany(validParcels);
-
-    res.status(201).json({
-      message: 'Bulk upload complete',
-      uploaded: inserted.length,
-      errors,
-    });
+    const created = await Parcel.insertMany(parcelsWithSender);
+    res.status(201).json(created);
   } catch (error) {
-    console.error('Bulk creation error:', error);
+    console.warn('Bulk creation error:', error);
     res.status(500).json({ message: 'Failed to process bulk upload' });
   }
 };
+
+
 
 
