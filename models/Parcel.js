@@ -23,6 +23,17 @@ const parcelSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    phone: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    deliveryType: {
+      type: String,
+      enum: ['Standard', 'Express', 'Same Day'],
+      default: 'Standard',
+    },
+
     postcode: { // ✅ Add this
       type: String,
       required: true,

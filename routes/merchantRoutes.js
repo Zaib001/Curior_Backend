@@ -1,5 +1,5 @@
 const express = require('express');
-const { createOrder, getOrders, trackParcelPublicly,getParcels,optimizeRoute, getAnalytics,updateOrderStatus,searchOrders,getRealTimeLocation, createPickupRequest, getPickupRequests } = require('../controllers/merchantController');
+const { createOrder, getOrders,createParcelsBulk, trackParcelPublicly,getParcels,optimizeRoute, getAnalytics,updateOrderStatus,searchOrders,getRealTimeLocation, createPickupRequest, getPickupRequests } = require('../controllers/merchantController');
 const authMiddleware = require('../middleware/auth');
 const router = express.Router();
 
@@ -15,4 +15,6 @@ router.post('/optimize-route', authMiddleware(['driver']), optimizeRoute);
 router.get('/real-time-location/:parcelId', authMiddleware(['driver', 'admin']), getRealTimeLocation);
 router.get('/track/:trackingId', authMiddleware(['merchant']), trackParcelPublicly);
 router.get('/analytics', authMiddleware(['merchant']), getAnalytics);
+router.post('/parcels/bulk', authMiddleware(['merchant']), createParcelsBulk);
+
 module.exports = router;

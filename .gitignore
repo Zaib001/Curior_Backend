@@ -1,0 +1,49 @@
+# Node Modules
+node_modules/
+
+# Build Output
+dist/
+build/
+
+# Environment Variables
+.env
+.env.local
+.env.development
+.env.production
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite cache
+.vite/
+.vitepress/
+
+# Editor Config
+.vscode/
+.idea/
+.DS_Store
+
+# OS Files
+Thumbs.db
+
+# Optional: Test Coverage
+coverage/
+
+# Parcel / Webpack / Temp
+.cache/
+.parcel-cache/
+*.local
+*.log
+*.tmp
+*.swp
+
+# Firebase / Netlify / Render Configs (if any)
+.firebase/
+.netlify/
+render.yaml
+
+# Mac specific
+*.DS_Store

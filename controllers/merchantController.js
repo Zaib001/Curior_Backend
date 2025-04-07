@@ -3,6 +3,7 @@ const Parcel = require('../models/Parcel');
 const PickupRequest = require('../models/PickupRequest');
 const sendEmail = require('../config/email');
 const axios = require('axios');
+const checkIfWithinM25 = require('../utils/checkM25');
 
 
 exports.getParcels = async (req, res) => {
@@ -15,7 +16,6 @@ exports.getParcels = async (req, res) => {
     res.status(500).json({ message: 'Server error while fetching parcels' });
   }
 };
-
 // Create Order
 exports.createOrder = async (req, res) => {
   try {
@@ -35,7 +35,6 @@ exports.createOrder = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 // Get Orders
 exports.getOrders = async (req, res) => {
   try {
@@ -46,9 +45,7 @@ exports.getOrders = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 // Create Pickup Request
-// ✅ Updated controller
 exports.createPickupRequest = async (req, res) => {
   try {
     const { parcelId, pickupDate, pickupTime, address } = req.body;
@@ -71,8 +68,6 @@ exports.createPickupRequest = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 // Get Pickup Requests
 exports.getPickupRequests = async (req, res) => {
   try {
@@ -82,7 +77,6 @@ exports.getPickupRequests = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;
@@ -98,8 +92,6 @@ exports.updateOrderStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-
 exports.searchOrders = async (req, res) => {
   try {
     const { status, customerName, orderId } = req.query;
@@ -115,7 +107,6 @@ exports.searchOrders = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
 exports.optimizeRoute = async (req, res) => {
   try {
     const { stops, driverId } = req.body;
@@ -141,7 +132,6 @@ exports.optimizeRoute = async (req, res) => {
     res.status(500).json({ message: 'Failed to optimize route' });
   }
 };
-
 exports.getRealTimeLocation = async (req, res) => {
   try {
     const { parcelId } = req.params;
@@ -206,3 +196,61 @@ exports.getAnalytics = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+exports.createParcelsBulk = async (req, res) => {
+  try {
+    const { parcels } = req.body;
+    const merchantId = req.user._id;
+
+    if (!Array.isArray(parcels) || parcels.length === 0) {
+      return res.status(400).json({ message: 'No parcels provided.' });
+    }
+
+    const errors = [];
+    const validParcels = [];
+
+    for (let i = 0; i < parcels.length; i++) {
+      const row = parcels[i];
+      const rowNumber = i + 2; 
+
+      if (!row.receiver || !row.trackingId || !row.address || !row.postcode) {
+        errors.push(`Row ${rowNumber}: Missing required fields.`);
+        continue;
+      }
+
+      const existing = await Parcel.findOne({ trackingId: row.trackingId });
+      if (existing) {
+        errors.push(`Row ${rowNumber}: Duplicate tracking ID (${row.trackingId}).`);
+        continue;
+      }
+
+      validParcels.push({
+        sender: merchantId,
+        receiver: row.receiver,
+        trackingId: row.trackingId.toUpperCase(),
+        address: row.address,
+        postcode: row.postcode,
+        currentStatus: row.currentStatus || 'Created',
+        phone: row.phone || '',
+        deliveryType: row.deliveryType || 'Standard',
+        isWithinM25: checkIfWithinM25(row.postcode),
+      });
+    }
+
+    if (validParcels.length === 0) {
+      return res.status(400).json({ message: 'No valid parcels to upload.', errors });
+    }
+
+    const inserted = await Parcel.insertMany(validParcels);
+
+    res.status(201).json({
+      message: 'Bulk upload complete',
+      uploaded: inserted.length,
+      errors,
+    });
+  } catch (error) {
+    console.error('Bulk creation error:', error);
+    res.status(500).json({ message: 'Failed to process bulk upload' });
+  }
+};
+
+
