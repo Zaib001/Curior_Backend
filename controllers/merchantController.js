@@ -45,30 +45,32 @@ exports.getOrders = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-// Create Pickup Request
+// CREATE Pickup Request (multiple parcelIds)
 exports.createPickupRequest = async (req, res) => {
   try {
-    const { parcelId, pickupDate, pickupTime, address } = req.body;
+    const { parcelIds, pickupDate, pickupTime, address } = req.body;
 
-    if (!parcelId || !pickupDate || !pickupTime || !address) {
+    if (!Array.isArray(parcelIds) || parcelIds.length === 0 || !pickupDate || !pickupTime || !address) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    const pickupRequest = new PickupRequest({
+    const pickup = new PickupRequest({
       merchantId: req.user.userId,
-      parcelId,
+      parcelIds,
       pickupDate,
       pickupTime,
       address
     });
 
-    await pickupRequest.save();
-    res.status(201).json(pickupRequest);
+    await pickup.save();
+    res.status(201).json(pickup);
   } catch (error) {
+    console.error('Pickup request error:', error);
     res.status(500).json({ message: error.message });
   }
 };
-// Get Pickup Requests
+
+// GET Pickup Requests
 exports.getPickupRequests = async (req, res) => {
   try {
     const requests = await PickupRequest.find({ merchantId: req.user.userId });
@@ -77,6 +79,7 @@ exports.getPickupRequests = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { status } = req.body;

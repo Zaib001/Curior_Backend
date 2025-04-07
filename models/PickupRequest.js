@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 
 const pickupRequestSchema = new mongoose.Schema({
-  parcelId: { type: String, required: true },
+  parcelIds: {
+    type: [String], // array of parcel _id
+    required: true
+  },
   pickupDate: { type: String, required: true },
   pickupTime: { type: String, required: true },
   address: { type: String, required: true },

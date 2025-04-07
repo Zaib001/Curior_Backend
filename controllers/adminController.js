@@ -391,3 +391,13 @@ exports.emailRevenueReport = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// Get all pickup requests (admin view)
+exports.getAllPickupRequests = async (req, res) => {
+  try {
+    const requests = await PickupRequest.find().populate('merchantId', 'name email');
+    res.json(requests);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

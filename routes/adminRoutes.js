@@ -17,7 +17,8 @@ const {
   getAverageDeliveryTime,
   getOrderValueInsights,
   getAllDrivers,
-  assignDriverToParcel
+  assignDriverToParcel,
+  getAllPickupRequests
 
 } = require('../controllers/adminController');
 
@@ -34,7 +35,7 @@ router.delete('/users/:userId', authMiddleware(['admin']), deleteUser);
 // ✅ Parcel Management APIs
 router.get('/parcels', authMiddleware(['admin']), getAllParcels);
 router.get('/orders', authMiddleware(['admin']), getAllOrders);
-
+router.get('/pickups', authMiddleware(['admin']),getAllPickupRequests);
 router.get('/drivers', authMiddleware(['admin']), getAllDrivers);
 // Assign Driver to Parcel
 router.put('/parcels/:parcelId/assign-driver', authMiddleware(['admin']), assignDriverToParcel);
