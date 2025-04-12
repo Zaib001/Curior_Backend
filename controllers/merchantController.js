@@ -201,7 +201,7 @@ exports.getAnalytics = async (req, res) => {
 };
 exports.createParcelsBulk = async (req, res) => {
   try {
-    const { parcels } = req.body;
+    const parcels = req.body; // 🔄 Updated: Accept plain array
     const senderId = req.user.userId;
 
     if (!Array.isArray(parcels) || parcels.length === 0) {
@@ -209,19 +209,20 @@ exports.createParcelsBulk = async (req, res) => {
     }
 
     const enrichedParcels = parcels.map((p) => ({
-      trackingId: p['Parcel Reference']?.trim(),
-      receiver: p['Recipient Name']?.trim(),
-      address: `${p['Address Line 1']?.trim() || ''} ${p['Address Line 2']?.trim() || ''}, ${p['City']?.trim() || ''}`,
-      postcode: p['Postcode']?.trim(),
-      phone: p['Phone Number']?.trim() || '',
-      deliveryType: 'Standard',
+      ...p,
       sender: senderId,
-      isWithinM25: checkIfWithinM25(p['Postcode']),
+      isWithinM25: checkIfWithinM25(p.postcode),
     }));
 
-    
+    const validParcels = enrichedParcels.filter((p) =>
+      p.trackingId && p.receiver && p.address && p.postcode && typeof p.isWithinM25 === 'boolean'
+    );
 
-    const created = await Parcel.insertMany(enrichedParcels);
+    if (validParcels.length === 0) {
+      return res.status(400).json({ message: 'No valid parcels to insert.' });
+    }
+
+    const created = await Parcel.insertMany(validParcels);
     res.status(201).json(created);
   } catch (error) {
     console.warn('🔴 Bulk creation error:', error);
