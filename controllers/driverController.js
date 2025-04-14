@@ -1,6 +1,17 @@
 const Parcel = require('../models/Parcel');
 
-// Get all assigned parcels for a driver
+
+exports.getDriverParcels = async (req, res) => {
+  const driverId = req.user.userId;
+  const parcels = await Parcel.find({ driverId });
+  res.json(parcels);
+};
+exports.updateParcelStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  await Parcel.findByIdAndUpdate(id, { currentStatus: status });
+  res.json({ message: 'Status updated' });
+};
 exports.getAssignedParcels = async (req, res) => {
   try {
     const driverId = req.user.userId;
@@ -10,8 +21,6 @@ exports.getAssignedParcels = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Get real-time location for a parcel
 exports.getRealTimeLocation = async (req, res) => {
   try {
     const { parcelId } = req.params;
@@ -26,8 +35,6 @@ exports.getRealTimeLocation = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-
-// Optimize route (example using just parcel list sorting)
 exports.optimizeRoute = async (req, res) => {
   try {
     const { parcelIds } = req.body;
@@ -42,20 +49,4 @@ exports.optimizeRoute = async (req, res) => {
   }
 };
 
-// Update parcel status
-exports.updateParcelStatus = async (req, res) => {
-  try {
-    const { parcelId } = req.params;
-    const { status } = req.body;
 
-    const parcel = await Parcel.findById(parcelId);
-    if (!parcel) return res.status(404).json({ message: 'Parcel not found' });
-
-    parcel.currentStatus = status;
-    await parcel.save();
-
-    res.json({ message: 'Parcel status updated', parcel });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};

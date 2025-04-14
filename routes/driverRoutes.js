@@ -1,18 +1,15 @@
 const express = require('express');
 const router = express.Router();
+const auth = require('../middleware/auth'); // Middleware to check JWT and attach req.user
 const {
-  getAssignedParcels,
-  getRealTimeLocation,
-  optimizeRoute,
+  getDriverParcels,
   updateParcelStatus
 } = require('../controllers/driverController');
 
-const authMiddleware = require('../middleware/auth'); // JWT middleware
+// 📨 GET all parcels assigned to the logged-in driver
+router.get('/parcels', auth('driver'), getDriverParcels);
 
-// All routes protected for driver role
-router.get('/assigned', authMiddleware(['driver']), getAssignedParcels);
-router.get('/real-time-location/:parcelId', authMiddleware(['driver']), getRealTimeLocation);
-router.post('/optimize-route', authMiddleware(['driver']), optimizeRoute);
-router.put('/:parcelId/status', authMiddleware(['driver']), updateParcelStatus);
+// 🔁 Update the status of a specific parcel
+router.patch('/parcels/:id/status', auth('driver'), updateParcelStatus);
 
 module.exports = router;
