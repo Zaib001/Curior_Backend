@@ -58,6 +58,12 @@ const parcelSchema = new mongoose.Schema(
       type: Boolean,
       required: true,
     },
+    currentLocation: {
+      lat: Number,
+      lng: Number
+    },
+    locationUpdatedAt: Date
+
   },
   {
     timestamps: true,

@@ -49,4 +49,22 @@ exports.optimizeRoute = async (req, res) => {
   }
 };
 
+// 📍 Update location (PATCH /driver/parcels/:id/location)
+exports.updateParcelLocation = async (req, res) => {
+  const { id } = req.params;
+  const { lat, lng } = req.body;
+  await Parcel.findByIdAndUpdate(id, {
+    currentLocation: { lat, lng },
+    locationUpdatedAt: new Date()
+  });
+  res.json({ message: 'Location updated' });
+};
+
+// 🌐 Public tracking page data (GET /public/track/:trackingId)
+exports.getTrackingInfo = async (req, res) => {
+  const { trackingId } = req.params;
+  const parcel = await Parcel.findOne({ trackingId });
+  if (!parcel) return res.status(404).json({ message: 'Not found' });
+  res.json(parcel);
+};
 
