@@ -36,16 +36,30 @@ exports.getRealTimeLocation = async (req, res) => {
   }
 };
 exports.optimizeRoute = async (req, res) => {
+  const { parcels } = req.body;
+
+  if (!Array.isArray(parcels) || parcels.length === 0) {
+    return res.status(400).json({ message: 'No parcels provided.' });
+  }
+
   try {
-    const { parcelIds } = req.body;
-    // Simulate a sorted route based on proximity or ID
-    const parcels = await Parcel.find({ _id: { $in: parcelIds } });
-    const sortedParcels = parcels.sort((a, b) =>
-      a.address.localeCompare(b.address)
-    );
-    res.json(sortedParcels);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    const circuitResponse = await axios.post('https://api.circuit.com/v1/optimize', {
+      stops: parcels.map(p => ({
+        address: p.address,
+        lat: p.currentLocation?.lat,
+        lng: p.currentLocation?.lng,
+        id: p._id,
+      })),
+    }, {
+      headers: {
+        Authorization: `Bearer YOUR_CIRCUIT_API_KEY`,
+      },
+    });
+
+    res.json(circuitResponse.data);
+  } catch (err) {
+    console.error('Circuit error:', err);
+    res.status(500).json({ message: 'Failed to optimize route' });
   }
 };
 
